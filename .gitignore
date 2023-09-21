@@ -1,0 +1,10 @@
+# Common directories
+build/
+
+# Visual Studio 20xx files
+.vs/
+JSON/
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
