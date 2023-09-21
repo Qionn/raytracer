@@ -27,15 +27,21 @@ void Renderer::Render(Scene* pScene) const
 	auto& materials = pScene->GetMaterials();
 	auto& lights = pScene->GetLights();
 
+	Vector3 rayDirection{ 0.0f, 0.0f, 1.0f };
+	const auto aspectRatio = static_cast<float>(m_Width) / static_cast<float>(m_Height);
+
 	for (int px{}; px < m_Width; ++px)
 	{
 		for (int py{}; py < m_Height; ++py)
 		{
-			float gradient = px / static_cast<float>(m_Width);
-			gradient += py / static_cast<float>(m_Width);
-			gradient /= 2.0f;
+			Vector3 rayDirection = {
+				(2.0f * (px + 0.5f) / m_Width - 1.0f) * aspectRatio,
+				1.0f - 2.0f * (py + 0.5f) / m_Height,
+				1.0f
+			};
+			rayDirection.Normalize();
 
-			ColorRGB finalColor{ gradient, gradient, gradient };
+			ColorRGB finalColor{ rayDirection.x, rayDirection.y, rayDirection.z };
 
 			//Update Color in Buffer
 			finalColor.MaxToOne();
