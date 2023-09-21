@@ -29,6 +29,7 @@ void Renderer::Render(Scene* pScene) const
 
 	Vector3 rayDirection{ 0.0f, 0.0f, 1.0f };
 	const auto aspectRatio = static_cast<float>(m_Width) / static_cast<float>(m_Height);
+	Sphere testSphere{ {0.0f, 0.0f, 100.0f}, 50.0f, 0 };
 
 	for (int px{}; px < m_Width; ++px)
 	{
@@ -41,7 +42,19 @@ void Renderer::Render(Scene* pScene) const
 			};
 			rayDirection.Normalize();
 
-			ColorRGB finalColor{ rayDirection.x, rayDirection.y, rayDirection.z };
+			Ray viewRay{ Vector3::Zero, rayDirection };
+
+			ColorRGB finalColor{};
+
+			HitRecord closestHit{};
+			GeometryUtils::HitTest_Sphere(testSphere, viewRay, closestHit);
+
+			if (closestHit.didHit)
+			{
+				//finalColor = materials[closestHit.materialIndex]->Shade();
+				float scalted_t = (closestHit.t - 50.0f) / 40.0f;
+				finalColor = { scalted_t, scalted_t, scalted_t };
+			}
 
 			//Update Color in Buffer
 			finalColor.MaxToOne();
