@@ -1,5 +1,7 @@
 # Common directories
 build/
+bin/
+TempFiles/
 
 # Visual Studio 20xx files
 .vs/
