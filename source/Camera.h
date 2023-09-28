@@ -31,7 +31,6 @@ namespace dae
 
 		Matrix cameraToWorld{};
 
-
 		Matrix CalculateCameraToWorld()
 		{
 			auto translation = Matrix::CreateTranslation(origin);
@@ -53,8 +52,18 @@ namespace dae
 			int mouseX{}, mouseY{};
 			const uint32_t mouseState = SDL_GetRelativeMouseState(&mouseX, &mouseY);
 
-			//todo: W2
-			//assert(false && "Not Implemented Yet");
+			constexpr float speed = 10.0f;
+
+			int8_t zDir = pKeyboardState[SDL_SCANCODE_W] - pKeyboardState[SDL_SCANCODE_S];
+			int8_t xDir = pKeyboardState[SDL_SCANCODE_D] - pKeyboardState[SDL_SCANCODE_A];
+
+			origin.x += xDir * speed * pTimer->GetElapsed();
+			origin.z += zDir * speed * pTimer->GetElapsed();
+
+			if (xDir != 0 || zDir != 0)
+			{
+				CalculateCameraToWorld();
+			}
 		}
 	};
 }
