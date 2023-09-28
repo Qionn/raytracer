@@ -30,16 +30,16 @@ namespace dae
 			float inv2a = 1.0f / (2.0f * a);
 
 			float t = (-b - sqrtDiscriminant) * inv2a;
-			if (t < ray.min || t > ray.max)
+			if (t < ray.min || t > ray.max || t > hitRecord.t)
 			{
 				t = (-b + sqrtDiscriminant) * inv2a;
-				if (t < ray.min || t > ray.max)
+				if (t < ray.min || t > ray.max || t > hitRecord.t)
 				{
 					return false;
 				}
 			}
 			
-			if (!ignoreHitRecord && t < hitRecord.t)
+			if (!ignoreHitRecord)
 			{
 				Vector3 intersect = ray.origin + ray.direction * t;
 				Vector3 normal = (intersect - sphere.origin).Normalized();
@@ -66,12 +66,12 @@ namespace dae
 		{
 			float t = Vector3::Dot(plane.origin - ray.origin, plane.normal) / Vector3::Dot(ray.direction, plane.normal);
 
-			if (t < ray.min || t > ray.max)
+			if (t < ray.min || t > ray.max || t > hitRecord.t)
 			{
 				return false;
 			}
 
-			if (!ignoreHitRecord && t < hitRecord.t)
+			if (!ignoreHitRecord)
 			{
 				hitRecord.didHit = true;
 				hitRecord.materialIndex = plane.materialIndex;
