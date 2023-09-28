@@ -63,24 +63,28 @@ namespace dae
 			constexpr float rotationSpeed = 1.0f;
 
 			int8_t xDir = pKeyboardState[SDL_SCANCODE_D] - pKeyboardState[SDL_SCANCODE_A];
+			int8_t yDir = pKeyboardState[SDL_SCANCODE_E] - pKeyboardState[SDL_SCANCODE_Q];
 			int8_t zDir = pKeyboardState[SDL_SCANCODE_W] - pKeyboardState[SDL_SCANCODE_S];
 
-			bool isMoving = xDir != 0 || zDir != 0;
+			bool isMoving = xDir != 0 || yDir != 0 || zDir != 0;
 			bool isLeftMouseDown = SDL_BUTTON(mouseState) == SDL_BUTTON_LEFT;
 			bool isRotating = isLeftMouseDown && (mouseX != 0.0f || mouseY != 0.0f);
 
-			Vector3 localForward = cameraToWorld.TransformVector(forward);
-			localForward.Normalize();
+			if (isMoving)
+			{
+				Vector3 localForward = cameraToWorld.TransformVector(forward).Normalized();
+				Vector3 localRight = Vector3::Cross(up, localForward).Normalized();
+				Vector3 localUp = Vector3::Cross(localForward, localRight);
 
-			Vector3 localRight = Vector3::Cross(up, localForward);
-
-			origin += zDir * localForward;
-			origin += xDir * localRight;
+				origin += xDir * walkSpeed * localRight * deltaTime;
+				origin += yDir * walkSpeed * localUp * deltaTime;
+				origin += zDir * walkSpeed * localForward * deltaTime;
+			}
 
 			if (isLeftMouseDown)
 			{
-				totalPitch += mouseY * rotationSpeed * pTimer->GetElapsed();
-				totalYaw += mouseX * rotationSpeed * pTimer->GetElapsed();
+				totalPitch += mouseY * rotationSpeed * deltaTime;
+				totalYaw += mouseX * rotationSpeed * deltaTime;
 			}
 
 			if (isMoving || isRotating)
