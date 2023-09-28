@@ -70,6 +70,8 @@ namespace dae
 			bool isLeftMouseDown = SDL_BUTTON(mouseState) == SDL_BUTTON_LEFT;
 			bool isRotating = isLeftMouseDown && (mouseX != 0.0f || mouseY != 0.0f);
 
+			SDL_SetRelativeMouseMode(static_cast<SDL_bool>(isLeftMouseDown));
+
 			if (isMoving)
 			{
 				Vector3 localForward = cameraToWorld.TransformVector(forward).Normalized();
