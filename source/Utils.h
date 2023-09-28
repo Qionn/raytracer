@@ -1,4 +1,5 @@
 #pragma once
+#include <algorithm>
 #include <cassert>
 #include <fstream>
 #include "Math.h"
@@ -38,7 +39,7 @@ namespace dae
 				}
 			}
 			
-			if (!ignoreHitRecord)
+			if (!ignoreHitRecord && t < hitRecord.t)
 			{
 				Vector3 intersect = ray.origin + ray.direction * t;
 				Vector3 normal = (intersect - sphere.origin).Normalized();
@@ -70,7 +71,7 @@ namespace dae
 				return false;
 			}
 
-			if (!ignoreHitRecord)
+			if (!ignoreHitRecord && t < hitRecord.t)
 			{
 				hitRecord.didHit = true;
 				hitRecord.materialIndex = plane.materialIndex;
