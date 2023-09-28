@@ -26,24 +26,16 @@ namespace dae {
 		m_Materials.clear();
 	}
 
-	void dae::Scene::GetClosestHit(const Ray& ray, HitRecord& closestHit) const
+	void Scene::GetClosestHit(const Ray& ray, HitRecord& closestHit) const
 	{
-		HitRecord tempRecord{};
-		
 		for (const Sphere& sphere : m_SphereGeometries)
 		{
-			if (GeometryUtils::HitTest_Sphere(sphere, ray, tempRecord) && tempRecord.t < closestHit.t)
-			{
-				closestHit = tempRecord;
-			}
+			GeometryUtils::HitTest_Sphere(sphere, ray, closestHit);
 		}
 
 		for (const Plane& plane : m_PlaneGeometries)
 		{
-			if (GeometryUtils::HitTest_Plane(plane, ray, tempRecord) && tempRecord.t < closestHit.t)
-			{
-				closestHit = tempRecord;
-			}
+			GeometryUtils::HitTest_Plane(plane, ray, closestHit);
 		}
 	}
 
