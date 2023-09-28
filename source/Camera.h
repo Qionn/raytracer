@@ -1,4 +1,5 @@
 #pragma once
+#include <algorithm>
 #include <cassert>
 #include <SDL_keyboard.h>
 #include <SDL_mouse.h>
@@ -87,6 +88,9 @@ namespace dae
 			{
 				totalPitch += mouseY * rotationSpeed * deltaTime;
 				totalYaw += mouseX * rotationSpeed * deltaTime;
+
+				constexpr float pi = static_cast<float>(M_PI / 2);
+				totalPitch = std::clamp(totalPitch, -pi, pi);
 			}
 
 			if (isMoving || isRotating)
