@@ -34,9 +34,12 @@ void Renderer::Render(Scene* pScene) const
 	{
 		for (int py{}; py < m_Height; ++py)
 		{
+			float ndcX = (2.0f * (px + 0.5f) / m_Width - 1.0f);
+			float ndcY = 1.0f - 2.0f * (py + 0.5f) / m_Height;
+
 			Vector3 rayDirection = {
-				(2.0f * (px + 0.5f) / m_Width - 1.0f) * aspectRatio,
-				1.0f - 2.0f * (py + 0.5f) / m_Height,
+				ndcX * camera.tanHalfFov * aspectRatio,
+				ndcY * camera.tanHalfFov,
 				1.0f
 			};
 			rayDirection.Normalize();
