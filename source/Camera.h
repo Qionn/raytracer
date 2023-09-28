@@ -34,9 +34,11 @@ namespace dae
 
 		Matrix CalculateCameraToWorld()
 		{
-			//todo: W2
-			assert(false && "Not Implemented Yet");
-			return {};
+			auto translation = Matrix::CreateTranslation(origin);
+			auto rotation = Matrix::CreateRotationX(totalPitch) * Matrix::CreateRotationY(totalYaw);
+
+			cameraToWorld = rotation * translation;
+			return cameraToWorld;
 		}
 
 		void Update(Timer* pTimer)
