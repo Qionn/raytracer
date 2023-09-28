@@ -41,7 +41,9 @@ void Renderer::Render(Scene* pScene) const
 			};
 			rayDirection.Normalize();
 
-			Ray viewRay{ Vector3::Zero, rayDirection };
+			rayDirection = camera.cameraToWorld.TransformVector(rayDirection);
+
+			Ray viewRay{ camera.origin, rayDirection };
 
 			ColorRGB finalColor{};
 
