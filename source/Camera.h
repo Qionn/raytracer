@@ -81,7 +81,7 @@ namespace dae
 				origin += zDir * walkSpeed * localForward * deltaTime;
 			}
 
-			if (isLeftMouseDown)
+			if (isRotating)
 			{
 				totalPitch += mouseY * rotationSpeed * deltaTime;
 				totalYaw += mouseX * rotationSpeed * deltaTime;
