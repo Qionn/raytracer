@@ -52,15 +52,31 @@ namespace dae
 			int mouseX{}, mouseY{};
 			const uint32_t mouseState = SDL_GetRelativeMouseState(&mouseX, &mouseY);
 
-			constexpr float speed = 10.0f;
+			constexpr float walkSpeed = 10.0f;
+			constexpr float rotationSpeed = 1.0f;
 
 			int8_t zDir = pKeyboardState[SDL_SCANCODE_W] - pKeyboardState[SDL_SCANCODE_S];
 			int8_t xDir = pKeyboardState[SDL_SCANCODE_D] - pKeyboardState[SDL_SCANCODE_A];
 
-			origin.x += xDir * speed * pTimer->GetElapsed();
-			origin.z += zDir * speed * pTimer->GetElapsed();
+			bool isMoving = xDir != 0 || zDir != 0;
+			bool isLeftMouseDown = SDL_BUTTON(mouseState) == SDL_BUTTON_LEFT;
+			bool isRotating = isLeftMouseDown && (mouseX > 0.0f || mouseY > 0.0f);
 
-			if (xDir != 0 || zDir != 0)
+			Vector3 localForward = cameraToWorld.TransformVector(forward);
+			localForward.Normalize();
+
+			Vector3 localRight = Vector3::Cross(up, localForward);
+
+			origin += zDir * localForward;
+			origin += xDir * localRight;
+
+			if (isLeftMouseDown)
+			{
+				totalPitch += mouseY * rotationSpeed * pTimer->GetElapsed();
+				totalYaw += mouseX * rotationSpeed * pTimer->GetElapsed();
+			}
+
+			if (isMoving || isRotating)
 			{
 				CalculateCameraToWorld();
 			}
