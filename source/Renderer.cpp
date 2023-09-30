@@ -27,7 +27,6 @@ void Renderer::Render(Scene* pScene) const
 	auto& materials = pScene->GetMaterials();
 	auto& lights = pScene->GetLights();
 
-	Vector3 rayDirection{ 0.0f, 0.0f, 1.0f };
 	const auto aspectRatio = static_cast<float>(m_Width) / static_cast<float>(m_Height);
 
 	for (int px{}; px < m_Width; ++px)
@@ -42,9 +41,9 @@ void Renderer::Render(Scene* pScene) const
 				ndcY * camera.tanHalfFov,
 				1.0f
 			};
-			rayDirection.Normalize();
 
 			rayDirection = camera.cameraToWorld.TransformVector(rayDirection);
+			rayDirection.Normalize();
 
 			Ray viewRay{ camera.origin, rayDirection };
 
