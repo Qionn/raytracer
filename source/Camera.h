@@ -68,7 +68,7 @@ namespace dae
 			int8_t zDir = pKeyboardState[SDL_SCANCODE_W] - pKeyboardState[SDL_SCANCODE_S];
 
 			bool isMoving = xDir != 0 || yDir != 0 || zDir != 0;
-			bool isLeftMouseDown = SDL_BUTTON(mouseState) == SDL_BUTTON_LEFT;
+			bool isLeftMouseDown = mouseState & SDL_BUTTON(1);
 			bool isRotating = isLeftMouseDown && (mouseX != 0.0f || mouseY != 0.0f);
 
 			SDL_SetRelativeMouseMode(static_cast<SDL_bool>(isLeftMouseDown));

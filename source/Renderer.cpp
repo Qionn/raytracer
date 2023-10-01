@@ -43,14 +43,14 @@ void Renderer::Render(Scene* pScene) const
 			};
 
 			rayDirection = camera.cameraToWorld.TransformVector(rayDirection);
-			rayDirection.Normalize();
+			//rayDirection.Normalize(); // Optional?
 
-			Ray viewRay{ camera.origin, rayDirection };
+			Ray ray{ camera.origin, rayDirection };
 
 			ColorRGB finalColor{};
 
 			HitRecord closestHit{};
-			pScene->GetClosestHit(viewRay, closestHit);
+			pScene->GetClosestHit(ray, closestHit);
 
 			if (closestHit.didHit)
 			{
@@ -59,12 +59,12 @@ void Renderer::Render(Scene* pScene) const
 				for (auto& light : lights)
 				{
 					Vector3 lightRayDirection = light.origin - closestHit.origin;
-					Vector3 lightRayOrigin = closestHit.origin + closestHit.normal * 0.0001f;
 				
-					Ray lightRay{ lightRayOrigin, lightRayDirection.Normalized() };
-					lightRay.max = lightRayDirection.Magnitude();
+					ray.max = lightRayDirection.Normalize();
+					ray.origin = closestHit.origin + closestHit.normal * 0.0001f;
+					ray.direction = lightRayDirection;
 				
-					if (pScene->DoesHit(lightRay))
+					if (pScene->DoesHit(ray))
 					{
 						finalColor *= 0.5f;
 					}

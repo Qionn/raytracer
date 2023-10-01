@@ -53,7 +53,7 @@ namespace dae
 
 		inline bool HitTest_Sphere(const Sphere& sphere, const Ray& ray)
 		{
-			HitRecord temp{};
+			static HitRecord temp{};
 			return HitTest_Sphere(sphere, ray, temp, true);
 		}
 #pragma endregion
@@ -82,7 +82,7 @@ namespace dae
 
 		inline bool HitTest_Plane(const Plane& plane, const Ray& ray)
 		{
-			HitRecord temp{};
+			static HitRecord temp{};
 			return HitTest_Plane(plane, ray, temp, true);
 		}
 #pragma endregion
