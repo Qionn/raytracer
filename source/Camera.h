@@ -35,7 +35,7 @@ namespace dae
 
 		void ChangeFOV(float fov)
 		{
-			fovAngle = fov;
+			fovAngle = TO_RADIANS * fov;
 			tanHalfFov = std::tan(fovAngle * 0.5f);
 		}
 
