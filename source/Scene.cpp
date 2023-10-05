@@ -187,20 +187,20 @@ namespace dae {
 		m_Camera.ChangeFOV(45.0f);
 
 		//default: Material id0 >> SolidColor Material (RED)
-		constexpr unsigned char matId_Solid_Red = 0;
-		const unsigned char matId_Solid_Blue = AddMaterial(new Material_SolidColor{ colors::Blue });
-		const unsigned char matId_Solid_Yellow = AddMaterial(new Material_SolidColor{ colors::Yellow });
+		//constexpr unsigned char matId_Solid_Red = 0;
+		const unsigned char matId_Lambert_Red = AddMaterial(new Material_Lambert{ colors::Red, 1.0f });
+		const unsigned char matId_Lambert_Blue = AddMaterial(new Material_Lambert{ colors::Blue, 1.0f });
+		const unsigned char matId_Lambert_Yellow = AddMaterial(new Material_Lambert{ colors::Yellow, 1.0f });
 
 		//Spheres
-		AddSphere({ -.75f, 1.f, .0f }, 1.f, matId_Solid_Red);
-		AddSphere({ .75f, 1.f, .0f }, 1.f, matId_Solid_Blue);
+		AddSphere({ -.75f, 1.f, .0f }, 1.f, matId_Lambert_Red);
+		AddSphere({ .75f, 1.f, .0f }, 1.f, matId_Lambert_Blue);
 
 		//Plane
-		AddPlane({ 0.f, 0.f, 0.f }, { 0.f, 1.f, 0.f }, matId_Solid_Yellow);
+		AddPlane({ 0.f, 0.f, 0.f }, { 0.f, 1.f, 0.f }, matId_Lambert_Yellow);
 
 		//Light
 		AddPointLight({ 0.f, 5.f, 5.f }, 25.f, colors::White);
-		AddPointLight({ 0.f, 2.5f, -5.f }, 25.f, colors::White);
 
 	}
 #pragma endregion
