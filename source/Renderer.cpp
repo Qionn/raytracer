@@ -57,10 +57,12 @@ void Renderer::Render(Scene* pScene) const
 				for (auto& light : lights)
 				{
 					auto dot = Vector3::Dot(closestHit.normal, LightUtils::GetDirectionToLight(light, closestHit.origin).Normalized());
+
 					if (dot >= 0)
 					{
-						finalColor += LightUtils::GetRadiance(light, closestHit.origin) * dot;
+						finalColor += LightUtils::GetRadiance(light, closestHit.origin) * materials[closestHit.materialIndex]->Shade() * dot;
 					}
+
 				//	Vector3 lightRayDirection = light.origin - closestHit.origin;
 				//
 				//	ray.max = lightRayDirection.Normalize();
