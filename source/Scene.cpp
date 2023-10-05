@@ -188,7 +188,7 @@ namespace dae {
 
 		//default: Material id0 >> SolidColor Material (RED)
 		//constexpr unsigned char matId_Solid_Red = 0;
-		const unsigned char matId_Lambert_Red = AddMaterial(new Material_Lambert{ colors::Red, 1.0f });
+		const unsigned char matId_Lambert_Red = AddMaterial(new Material_LambertPhong{ colors::Red, 1.0f, 1.0f, 60.0f });
 		const unsigned char matId_Lambert_Blue = AddMaterial(new Material_Lambert{ colors::Blue, 1.0f });
 		const unsigned char matId_Lambert_Yellow = AddMaterial(new Material_Lambert{ colors::Yellow, 1.0f });
 
