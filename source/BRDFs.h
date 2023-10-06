@@ -32,7 +32,7 @@ namespace dae
 		 */
 		static ColorRGB Phong(float ks, float exp, const Vector3& l, const Vector3& v, const Vector3& n)
 		{
-			auto r = Vector3::Reflect(l, n);
+			auto r = Vector3::Reflect(n, l);
 			auto cosa = Vector3::Dot(r, v);
 			auto phong = ks * std::pow(cosa, exp);
 
