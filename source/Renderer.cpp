@@ -67,14 +67,23 @@ void Renderer::Render(Scene* pScene) const
 						continue;
 					}
 
-					// Lamber cosine law
-					auto lcl = Vector3::Dot(closestHit.normal, lightRayDirection);
-
-					if (lcl >= 0)
+					switch (m_LightingMode)
 					{
-						finalColor += LightUtils::GetRadiance(light, closestHit.origin)
-							* materials[closestHit.materialIndex]->Shade(closestHit, lightRayDirection, rayDirection)
-							* lcl;
+						case LightingMode::ObservedArea:
+							finalColor += LightingObservedArea(closestHit, lightRayDirection);
+							break;
+
+						case LightingMode::Radiance:
+							finalColor += LightingRadiance(closestHit, light);
+							break;
+
+						case LightingMode::BRDF:
+							finalColor += LightingBRDF(materials[closestHit.materialIndex], closestHit, lightRayDirection, rayDirection);
+							break;
+
+						case LightingMode::Combined:
+							finalColor += LightingCombined(materials[closestHit.materialIndex], closestHit, light, lightRayDirection, rayDirection);
+							break;
 					}
 				}
 			}
@@ -102,4 +111,41 @@ bool Renderer::SaveBufferToImage() const
 void Renderer::ToggleShadows()
 {
 	m_ShadowsEnabled = !m_ShadowsEnabled;
+}
+
+void Renderer::CycleLightingMode()
+{
+	const int modeCount = static_cast<int>(LightingMode::Count);
+	
+	int value = static_cast<int>(m_LightingMode);
+	value = (value + 1) % modeCount;
+
+	m_LightingMode = static_cast<LightingMode>(value);
+}
+
+ColorRGB Renderer::LightingObservedArea(const HitRecord& closestHit, const Vector3& l) const
+{
+	auto lcl = Vector3::Dot(closestHit.normal, l);
+	return (lcl >= 0.0f) ? ColorRGB{ lcl, lcl, lcl } : colors::Black;
+}
+
+ColorRGB Renderer::LightingRadiance(const HitRecord& closestHit, const Light& light) const
+{
+	return LightUtils::GetRadiance(light, closestHit.origin);
+}
+
+ColorRGB Renderer::LightingBRDF(Material* pMaterial, const HitRecord& closestHit, const Vector3& l, const Vector3& v) const
+{
+	return pMaterial->Shade(closestHit, l, v);
+}
+
+ColorRGB Renderer::LightingCombined(Material* pMaterial, const HitRecord& closestHit, const Light& light, const Vector3& l, const Vector3& v) const
+{
+	auto lcl = Vector3::Dot(closestHit.normal, l);
+	if (lcl < 0.0f)
+	{
+		return colors::Black;
+	}
+
+	return LightUtils::GetRadiance(light, closestHit.origin) * pMaterial->Shade(closestHit, l, v) * lcl;
 }
