@@ -78,6 +78,10 @@ int main(int argc, char* args[])
 					case SDL_SCANCODE_F2:
 						pRenderer->ToggleShadows();
 						break;
+
+					case SDL_SCANCODE_F3:
+						pRenderer->CycleLightingMode();
+						break;
 				}
 				break;
 			}

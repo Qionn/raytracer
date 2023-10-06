@@ -2,12 +2,28 @@
 
 #include <cstdint>
 
+#include "ColorRGB.h"
+
 struct SDL_Window;
 struct SDL_Surface;
 
 namespace dae
 {
 	class Scene;
+	class Material;
+	struct Vector3;
+	struct HitRecord;
+	struct Light;
+
+	enum class LightingMode
+	{
+		ObservedArea,
+		Radiance,
+		BRDF,
+		Combined,
+
+		Count
+	};
 
 	class Renderer final
 	{
@@ -24,6 +40,13 @@ namespace dae
 		bool SaveBufferToImage() const;
 
 		void ToggleShadows();
+		void CycleLightingMode();
+
+	private:
+		ColorRGB LightingObservedArea(const HitRecord& closestHit, const Vector3& l) const;
+		ColorRGB LightingRadiance(const HitRecord& closestHit, const Light& light) const;
+		ColorRGB LightingBRDF(Material* pMaterial, const HitRecord& closestHit, const Vector3& l, const Vector3& v) const;
+		ColorRGB LightingCombined(Material* pMaterial, const HitRecord& closestHit, const Light& light, const Vector3& l, const Vector3& v) const;
 
 	private:
 		SDL_Window* m_pWindow{};
@@ -33,6 +56,8 @@ namespace dae
 
 		int m_Width{};
 		int m_Height{};
+
+		LightingMode m_LightingMode = LightingMode::Combined;
 
 		bool m_ShadowsEnabled = true;
 	};
