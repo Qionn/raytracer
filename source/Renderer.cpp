@@ -62,7 +62,7 @@ void Renderer::Render(Scene* pScene) const
 					ray.origin = closestHit.origin + closestHit.normal * 0.0001f;
 					ray.direction = lightRayDirection;
 				
-					if (pScene->DoesHit(ray))
+					if (m_ShadowsEnabled && pScene->DoesHit(ray))
 					{
 						continue;
 					}
@@ -97,4 +97,9 @@ void Renderer::Render(Scene* pScene) const
 bool Renderer::SaveBufferToImage() const
 {
 	return SDL_SaveBMP(m_pBuffer, "RayTracing_Buffer.bmp");
+}
+
+void Renderer::ToggleShadows()
+{
+	m_ShadowsEnabled = !m_ShadowsEnabled;
 }
