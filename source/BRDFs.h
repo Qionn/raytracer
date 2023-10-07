@@ -32,10 +32,15 @@ namespace dae
 		 */
 		static ColorRGB Phong(float ks, float exp, const Vector3& l, const Vector3& v, const Vector3& n)
 		{
-			auto r = Vector3::Reflect(n, l);
-			auto cosa = Vector3::Dot(r, v);
-			auto phong = ks * std::pow(cosa, exp);
+			Vector3 r = Vector3::Reflect(l, n);
+			float cosa = Vector3::Dot(r, v);
 
+			if (cosa < 0.0f)
+			{
+				return colors::Black;
+			}
+
+			float phong = ks * std::pow(cosa, exp);
 			return ColorRGB{ phong, phong, phong };
 		}
 
