@@ -53,9 +53,8 @@ namespace dae
 		 */
 		static ColorRGB FresnelFunction_Schlick(const Vector3& h, const Vector3& v, const ColorRGB& f0)
 		{
-			//todo: W3
-			assert(false && "Not Implemented Yet");
-			return {};
+			const float t = 1 - Vector3::Dot(h, v);
+			return f0 + (ColorRGB{ 1, 1, 1 } - f0) * (t * t * t * t * t);
 		}
 
 		/**
@@ -67,11 +66,12 @@ namespace dae
 		 */
 		static float NormalDistribution_GGX(const Vector3& n, const Vector3& h, float roughness)
 		{
-			//todo: W3
-			assert(false && "Not Implemented Yet");
-			return {};
-		}
+			const float nhDot = Vector3::Dot(n, h);
+			const float a = roughness * roughness;
+			const float t = nhDot * nhDot * (a * a - 1) + 1;
 
+			return (a * a) / (static_cast<float>(M_PI) * t * t);
+		}
 
 		/**
 		 * \brief BRDF Geometry Function >> Schlick GGX (Direct Lighting + UE4 implementation - squared(roughness))
@@ -82,9 +82,17 @@ namespace dae
 		 */
 		static float GeometryFunction_SchlickGGX(const Vector3& n, const Vector3& v, float roughness)
 		{
-			//todo: W3
-			assert(false && "Not Implemented Yet");
-			return {};
+			const float nvDot = Vector3::Dot(n, v);
+
+			if (nvDot < 0.0f)
+			{
+				return 0.0f;
+			}
+
+			const float a1 = roughness * roughness + 1;
+			const float k = a1 * a1 / 8;
+
+			return nvDot / (nvDot * (1 - k) + k);
 		}
 
 		/**
@@ -97,9 +105,7 @@ namespace dae
 		 */
 		static float GeometryFunction_Smith(const Vector3& n, const Vector3& v, const Vector3& l, float roughness)
 		{
-			//todo: W3
-			assert(false && "Not Implemented Yet");
-			return {};
+			return GeometryFunction_SchlickGGX(n, v, roughness) * GeometryFunction_SchlickGGX(n, l, roughness);
 		}
 
 	}
