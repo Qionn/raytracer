@@ -61,6 +61,7 @@ namespace dae
 			const uint32_t mouseState = SDL_GetRelativeMouseState(&mouseX, &mouseY);
 
 			constexpr float walkSpeed = 10.0f;
+			constexpr float runSpeed = 35.0f;
 			constexpr float rotationSpeed = 1.0f;
 
 			int8_t xDir = pKeyboardState[SDL_SCANCODE_D] - pKeyboardState[SDL_SCANCODE_A];
@@ -70,18 +71,20 @@ namespace dae
 			bool isMoving = xDir != 0 || yDir != 0 || zDir != 0;
 			bool isLeftMouseDown = mouseState & SDL_BUTTON(1);
 			bool isRotating = isLeftMouseDown && (mouseX != 0.0f || mouseY != 0.0f);
+			bool isRunning = pKeyboardState[SDL_SCANCODE_LSHIFT];
 
 			SDL_SetRelativeMouseMode(static_cast<SDL_bool>(isLeftMouseDown));
 
 			if (isMoving)
 			{
-				Vector3 localForward = cameraToWorld.TransformVector(forward).Normalized();
+				Vector3 localForward = cameraToWorld.TransformVector(forward);
 				Vector3 localRight = Vector3::Cross(up, localForward).Normalized();
-				Vector3 localUp = Vector3::Cross(localForward, localRight);
 
-				origin += xDir * walkSpeed * localRight * deltaTime;
-				origin += yDir * walkSpeed * localUp * deltaTime;
-				origin += zDir * walkSpeed * localForward * deltaTime;
+				float speed = isRunning ? runSpeed : walkSpeed;
+
+				origin += xDir * speed * localRight * deltaTime;
+				origin += yDir * speed * up * deltaTime;
+				origin += zDir * speed * localForward * deltaTime;
 			}
 
 			if (isRotating)
