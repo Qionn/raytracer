@@ -32,8 +32,7 @@ namespace dae
 		 */
 		static ColorRGB Phong(float ks, float exp, const Vector3& l, const Vector3& v, const Vector3& n)
 		{
-			Vector3 r = Vector3::Reflect(l, n);
-			float cosa = Vector3::Dot(r, v);
+			float cosa = Vector3::Dot(Vector3::Reflect(l, n), v);
 
 			if (cosa < 0.0f)
 			{
@@ -54,7 +53,7 @@ namespace dae
 		static ColorRGB FresnelFunction_Schlick(const Vector3& h, const Vector3& v, const ColorRGB& f0)
 		{
 			const float t = 1 - Vector3::Dot(h, v);
-			return f0 + (ColorRGB{ 1, 1, 1 } - f0) * (t * t * t * t * t);
+			return f0 + (colors::White - f0) * (t * t * t * t * t);
 		}
 
 		/**

@@ -55,7 +55,6 @@ namespace dae
 			//Keyboard Input
 			const uint8_t* pKeyboardState = SDL_GetKeyboardState(nullptr);
 
-
 			//Mouse Input
 			int mouseX{}, mouseY{};
 			const uint32_t mouseState = SDL_GetRelativeMouseState(&mouseX, &mouseY);
@@ -77,8 +76,8 @@ namespace dae
 
 			if (isMoving)
 			{
-				Vector3 localForward = cameraToWorld.TransformVector(forward);
-				Vector3 localRight = Vector3::Cross(up, localForward).Normalized();
+				Vector3 localForward = cameraToWorld.GetAxisZ();
+				Vector3 localRight = cameraToWorld.GetAxisX();
 
 				float speed = isRunning ? runSpeed : walkSpeed;
 
@@ -96,10 +95,7 @@ namespace dae
 				totalPitch = std::clamp(totalPitch, -pi, pi);
 			}
 
-			if (isMoving || isRotating)
-			{
-				CalculateCameraToWorld();
-			}
+			CalculateCameraToWorld();
 		}
 	};
 }
