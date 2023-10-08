@@ -47,7 +47,7 @@ void Renderer::Render(Scene* pScene) const
 
 			Ray ray{ camera.origin, rayDirection };
 
-			ColorRGB finalColor{};
+			ColorRGB finalColor;
 
 			HitRecord closestHit{};
 			pScene->GetClosestHit(ray, closestHit);
@@ -125,29 +125,30 @@ void Renderer::CycleLightingMode()
 	m_LightingMode = static_cast<LightingMode>(value);
 }
 
-ColorRGB Renderer::LightingObservedArea(const HitRecord& closestHit, const Vector3& l) const
+ColorRGB Renderer::LightingObservedArea(const HitRecord& hitRecord, const Vector3& l) const
 {
-	auto lcl = Vector3::Dot(closestHit.normal, l);
-	return (lcl >= 0.0f) ? ColorRGB{ lcl, lcl, lcl } : colors::Black;
+	float lcl = Vector3::Dot(hitRecord.normal, l);
+	return (lcl >= 0.0f) ? ColorRGB{ lcl } : colors::Black;
 }
 
-ColorRGB Renderer::LightingRadiance(const HitRecord& closestHit, const Light& light) const
+ColorRGB Renderer::LightingRadiance(const HitRecord& hitRecord, const Light& light) const
 {
-	return LightUtils::GetRadiance(light, closestHit.origin);
+	return LightUtils::GetRadiance(light, hitRecord.origin);
 }
 
-ColorRGB Renderer::LightingBRDF(Material* pMaterial, const HitRecord& closestHit, const Vector3& l, const Vector3& v) const
+ColorRGB Renderer::LightingBRDF(Material* pMaterial, const HitRecord& hitRecord, const Vector3& l, const Vector3& v) const
 {
-	return pMaterial->Shade(closestHit, l, v);
+	return pMaterial->Shade(hitRecord, l, v);
 }
 
-ColorRGB Renderer::LightingCombined(Material* pMaterial, const HitRecord& closestHit, const Light& light, const Vector3& l, const Vector3& v) const
+ColorRGB Renderer::LightingCombined(Material* pMaterial, const HitRecord& hitRecord, const Light& light, const Vector3& l, const Vector3& v) const
 {
-	auto lcl = Vector3::Dot(closestHit.normal, l);
+	float lcl = Vector3::Dot(hitRecord.normal, l);
+
 	if (lcl < 0.0f)
 	{
 		return colors::Black;
 	}
 
-	return LightUtils::GetRadiance(light, closestHit.origin) * pMaterial->Shade(closestHit, l, v) * lcl;
+	return LightUtils::GetRadiance(light, hitRecord.origin) * pMaterial->Shade(hitRecord, l, v) * lcl;
 }

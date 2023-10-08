@@ -40,7 +40,7 @@ namespace dae
 			}
 
 			float phong = ks * std::pow(cosa, exp);
-			return ColorRGB{ phong, phong, phong };
+			return ColorRGB{ phong };
 		}
 
 		/**
@@ -52,8 +52,8 @@ namespace dae
 		 */
 		static ColorRGB FresnelFunction_Schlick(const Vector3& h, const Vector3& v, const ColorRGB& f0)
 		{
-			const float t = 1 - Vector3::Dot(h, v);
-			return f0 + (colors::White - f0) * (t * t * t * t * t);
+			const float t = 1.0f - Vector3::Dot(h, v);
+			return f0 + (1.0f - f0) * (t * t * t * t * t);
 		}
 
 		/**

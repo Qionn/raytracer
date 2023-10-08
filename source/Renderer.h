@@ -43,10 +43,10 @@ namespace dae
 		void CycleLightingMode();
 
 	private:
-		ColorRGB LightingObservedArea(const HitRecord& closestHit, const Vector3& l) const;
-		ColorRGB LightingRadiance(const HitRecord& closestHit, const Light& light) const;
-		ColorRGB LightingBRDF(Material* pMaterial, const HitRecord& closestHit, const Vector3& l, const Vector3& v) const;
-		ColorRGB LightingCombined(Material* pMaterial, const HitRecord& closestHit, const Light& light, const Vector3& l, const Vector3& v) const;
+		ColorRGB LightingObservedArea(const HitRecord& hitRecord, const Vector3& l) const;
+		ColorRGB LightingRadiance(const HitRecord& hitRecord, const Light& light) const;
+		ColorRGB LightingBRDF(Material* pMaterial, const HitRecord& hitRecord, const Vector3& l, const Vector3& v) const;
+		ColorRGB LightingCombined(Material* pMaterial, const HitRecord& hitRecord, const Light& light, const Vector3& l, const Vector3& v) const;
 
 	private:
 		SDL_Window* m_pWindow{};
