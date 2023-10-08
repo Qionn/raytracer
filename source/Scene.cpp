@@ -152,8 +152,8 @@ namespace dae {
 #pragma region SCENE W2
 	void Scene_W2::Initialize()
 	{
-		m_Camera.origin = { 0.f, 3.f, -9.f };
-		m_Camera.ChangeFOV(45.0f);
+		m_Camera.origin = { 0, 3, -9 };
+		m_Camera.fovAngle = 45.0f;
 
 		constexpr unsigned char matId_Solid_Red = 0;
 
@@ -184,8 +184,8 @@ namespace dae {
 	void Scene_W3::Initialize()
 	{
 		sceneName = "Week 3";
-		m_Camera.origin = { 0,3,-9 };
-		m_Camera.ChangeFOV(45.0f);
+		m_Camera.origin = { 0, 3, -9 };
+		m_Camera.fovAngle = 45.0f;
 
 		const auto matCT_GrayRoughMetal = AddMaterial(new Material_CookTorrence({ .972f, .960f, .915f }, 1.f, 1.f));
 		const auto matCT_GrayMediumMetal = AddMaterial(new Material_CookTorrence({ .972f, .960f, .915f }, 1.f, .7f));

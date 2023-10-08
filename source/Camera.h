@@ -13,31 +13,27 @@ namespace dae
 	{
 		Camera() = default;
 
-		Camera(const Vector3& _origin, float _fovAngle):
-			origin{_origin}
+		Camera(const Vector3& _origin, float _fovAngle)
+			: origin{ _origin }
+			, fovAngle{ _fovAngle }
 		{
-			ChangeFOV(_fovAngle);
+
 		}
 
+		Vector3 origin;
 
-		Vector3 origin{};
-		float fovAngle{90.f};
-		float tanHalfFov{ 0.0f };
+		float totalPitch	= 0.0f;
+		float totalYaw		= 0.0f;
 
-		Vector3 forward{Vector3::UnitZ};
-		Vector3 up{Vector3::UnitY};
-		Vector3 right{Vector3::UnitX};
+		float fovAngle;
+		float prevFovAngle	= 0.0f;
+		float fov			= 0.0f;
 
-		float totalPitch{0.f};
-		float totalYaw{0.f};
+		float rotationSpeed	= 1.0f;
+		float walkSpeed		= 10.0f;
+		float dragSpeed		= 5.0f;
 
-		Matrix cameraToWorld{};
-
-		void ChangeFOV(float fov)
-		{
-			fovAngle = TO_RADIANS * fov;
-			tanHalfFov = std::tan(fovAngle * 0.5f);
-		}
+		Matrix cameraToWorld;
 
 		Matrix CalculateCameraToWorld()
 		{
@@ -52,50 +48,57 @@ namespace dae
 		{
 			const float deltaTime = pTimer->GetElapsed();
 
-			//Keyboard Input
-			const uint8_t* pKeyboardState = SDL_GetKeyboardState(nullptr);
-
-			//Mouse Input
-			int mouseX{}, mouseY{};
-			const uint32_t mouseState = SDL_GetRelativeMouseState(&mouseX, &mouseY);
-
-			constexpr float walkSpeed = 10.0f;
-			constexpr float runSpeed = 35.0f;
-			constexpr float rotationSpeed = 1.0f;
-
-			int8_t xDir = pKeyboardState[SDL_SCANCODE_D] - pKeyboardState[SDL_SCANCODE_A];
-			int8_t yDir = pKeyboardState[SDL_SCANCODE_E] - pKeyboardState[SDL_SCANCODE_Q];
-			int8_t zDir = pKeyboardState[SDL_SCANCODE_W] - pKeyboardState[SDL_SCANCODE_S];
-
-			bool isMoving = xDir != 0 || yDir != 0 || zDir != 0;
-			bool isLeftMouseDown = mouseState & SDL_BUTTON(1);
-			bool isRotating = isLeftMouseDown && (mouseX != 0.0f || mouseY != 0.0f);
-			bool isRunning = pKeyboardState[SDL_SCANCODE_LSHIFT];
-
-			SDL_SetRelativeMouseMode(static_cast<SDL_bool>(isLeftMouseDown));
-
-			if (isMoving)
+			if (fovAngle != prevFovAngle)
 			{
-				Vector3 localForward = cameraToWorld.GetAxisZ();
-				Vector3 localRight = cameraToWorld.GetAxisX();
-
-				float speed = isRunning ? runSpeed : walkSpeed;
-
-				origin += xDir * speed * localRight * deltaTime;
-				origin += yDir * speed * up * deltaTime;
-				origin += zDir * speed * localForward * deltaTime;
+				prevFovAngle = fovAngle;
+				fov = std::tan(TO_RADIANS * fovAngle * 0.5f);
 			}
 
-			if (isRotating)
-			{
-				totalPitch += mouseY * rotationSpeed * deltaTime;
-				totalYaw += mouseX * rotationSpeed * deltaTime;
-
-				constexpr float pi = static_cast<float>(M_PI / 2);
-				totalPitch = std::clamp(totalPitch, -pi, pi);
-			}
+			HandleKeyboardInput(deltaTime);
+			HandleMouseInput(deltaTime);
 
 			CalculateCameraToWorld();
+		}
+
+		void HandleKeyboardInput(float dt)
+		{
+			const uint8_t* pKeyboardState = SDL_GetKeyboardState(nullptr);
+
+			const int8_t xDir = (pKeyboardState[SDL_SCANCODE_D] - pKeyboardState[SDL_SCANCODE_A] +
+								 pKeyboardState[SDL_SCANCODE_RIGHT] - pKeyboardState[SDL_SCANCODE_LEFT]);
+
+			const int8_t zDir = (pKeyboardState[SDL_SCANCODE_W] - pKeyboardState[SDL_SCANCODE_S] +
+								 pKeyboardState[SDL_SCANCODE_UP] - pKeyboardState[SDL_SCANCODE_DOWN]);
+
+			origin += zDir * walkSpeed * cameraToWorld.GetAxisZ() * dt;
+			origin += xDir * walkSpeed * cameraToWorld.GetAxisX() * dt;
+		}
+
+		void HandleMouseInput(float dt)
+		{
+			int mouseX, mouseY;
+			const uint32_t mouseState = SDL_GetRelativeMouseState(&mouseX, &mouseY);
+
+			const bool isLeftMouseDown	= static_cast<bool>(mouseState & SDL_BUTTON(1));
+			const bool isRightMouseDown	= static_cast<bool>(mouseState & SDL_BUTTON(3));
+			const bool areBothMouseDown	= isLeftMouseDown && isRightMouseDown;
+
+			SDL_SetRelativeMouseMode(static_cast<SDL_bool>(isLeftMouseDown || isRightMouseDown));
+
+			if (areBothMouseDown)
+			{
+				origin -= mouseY * dragSpeed * Vector3::UnitY * dt;
+			}
+			else if (isRightMouseDown)
+			{
+				totalYaw += mouseX * rotationSpeed * dt;
+				totalPitch += mouseY * rotationSpeed * dt;
+			}
+			else if (isLeftMouseDown)
+			{
+				origin -= mouseY * dragSpeed * cameraToWorld.GetAxisZ() * dt;
+				totalYaw += mouseX * rotationSpeed * dt;
+			}
 		}
 	};
 }

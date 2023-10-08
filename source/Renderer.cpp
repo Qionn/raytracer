@@ -37,8 +37,8 @@ void Renderer::Render(Scene* pScene) const
 			float ndcY = 1.0f - 2.0f * (py + 0.5f) / m_Height;
 
 			Vector3 rayDirection = {
-				ndcX * camera.tanHalfFov * aspectRatio,
-				ndcY * camera.tanHalfFov,
+				ndcX * camera.fov * aspectRatio,
+				ndcY * camera.fov,
 				1.0f
 			};
 
