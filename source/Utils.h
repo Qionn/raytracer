@@ -90,17 +90,90 @@ namespace dae
 		//TRIANGLE HIT-TESTS
 		inline bool HitTest_Triangle(const Triangle& triangle, const Ray& ray, HitRecord& hitRecord, bool ignoreHitRecord = false)
 		{
-			//todo W5
-			assert(false && "No Implemented Yet!");
-			return false;
+			float nvDot = Vector3::Dot(ray.direction, triangle.normal);
+			if (AreEqual(nvDot, 0.0f))
+			{
+				return false;
+			}
+
+			TriangleCullMode cullMode = triangle.cullMode;
+
+			if (ignoreHitRecord)
+			{
+				switch (cullMode)
+				{
+					case TriangleCullMode::FrontFaceCulling:
+						cullMode = TriangleCullMode::BackFaceCulling;
+						break;
+
+					case TriangleCullMode::BackFaceCulling:
+						cullMode = TriangleCullMode::FrontFaceCulling;
+						break;
+				}
+			}
+
+			switch (cullMode)
+			{
+				case TriangleCullMode::FrontFaceCulling:
+					if (nvDot < 0.0f)
+					{
+						return false;
+					}
+					break;
+
+				case TriangleCullMode::BackFaceCulling:
+					if (nvDot > 0.0f)
+					{
+						return false;
+					}
+					break;
+			}
+
+			float t = Vector3::Dot(triangle.v0 - ray.origin, triangle.normal) / Vector3::Dot(ray.direction, triangle.normal);
+
+			if (t < ray.min || t > ray.max)
+			{
+				return false;
+			}
+			
+			Vector3 intersect = ray.origin + ray.direction * t;
+
+			Vector3 e1 = triangle.v0 - triangle.v1;
+			Vector3 e2 = triangle.v1 - triangle.v2;
+			Vector3 e3 = triangle.v2 - triangle.v0;
+
+			Vector3 p1 = intersect - triangle.v1;
+			Vector3 p2 = intersect - triangle.v2;
+			Vector3 p3 = intersect - triangle.v0;
+
+			float t1 = Vector3::Dot(Vector3::Cross(e1, p1), triangle.normal);
+			float t2 = Vector3::Dot(Vector3::Cross(e2, p2), triangle.normal);
+			float t3 = Vector3::Dot(Vector3::Cross(e3, p3), triangle.normal);
+
+			if (t1 > 0.0f || t2 > 0.0f || t3 > 0.0f)
+			{
+				return false;
+			}
+
+			if (!ignoreHitRecord && t < hitRecord.t)
+			{
+				hitRecord.didHit = true;
+				hitRecord.materialIndex = triangle.materialIndex;
+				hitRecord.origin = intersect;
+				hitRecord.normal = triangle.normal;
+				hitRecord.t = t;
+			}
+
+			return true;
 		}
 
 		inline bool HitTest_Triangle(const Triangle& triangle, const Ray& ray)
 		{
-			HitRecord temp{};
+			static HitRecord temp{};
 			return HitTest_Triangle(triangle, ray, temp, true);
 		}
 #pragma endregion
+
 #pragma region TriangeMesh HitTest
 		inline bool HitTest_TriangleMesh(const TriangleMesh& mesh, const Ray& ray, HitRecord& hitRecord, bool ignoreHitRecord = false)
 		{
@@ -111,7 +184,7 @@ namespace dae
 
 		inline bool HitTest_TriangleMesh(const TriangleMesh& mesh, const Ray& ray)
 		{
-			HitRecord temp{};
+			static HitRecord temp{};
 			return HitTest_TriangleMesh(mesh, ray, temp, true);
 		}
 #pragma endregion
