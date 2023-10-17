@@ -38,6 +38,11 @@ namespace dae
 		{
 			GeometryUtils::HitTest_Plane(plane, ray, closestHit);
 		}
+
+		for (const Triangle& triangle : m_Triangles)
+		{
+			GeometryUtils::HitTest_Triangle(triangle, ray, closestHit);
+		}
 	}
 
 	bool Scene::DoesHit(const Ray& ray) const
@@ -53,6 +58,14 @@ namespace dae
 		for (const Plane& plane : m_PlaneGeometries)
 		{
 			if (GeometryUtils::HitTest_Plane(plane, ray))
+			{
+				return true;
+			}
+		}
+
+		for (const Triangle& triangle : m_Triangles)
+		{
+			if (GeometryUtils::HitTest_Triangle(triangle, ray))
 			{
 				return true;
 			}
@@ -235,7 +248,7 @@ namespace dae
 
 
 		Triangle triangle{ { -0.75f, 0.5f, 0.f }, { -0.75f, 2.0f, 0.0f }, { 0.75f, 0.5f, 0.0f } };
-		triangle.cullMode = TriangleCullMode::NoCulling;
+		triangle.cullMode = TriangleCullMode::BackFaceCulling;
 		triangle.materialIndex = matLambert_White;
 
 		m_Triangles.push_back(triangle);
