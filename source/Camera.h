@@ -64,11 +64,11 @@ namespace dae
 		{
 			const uint8_t* pKeyboardState = SDL_GetKeyboardState(nullptr);
 
-			const int8_t xDir = (pKeyboardState[SDL_SCANCODE_D] - pKeyboardState[SDL_SCANCODE_A] +
-								 pKeyboardState[SDL_SCANCODE_RIGHT] - pKeyboardState[SDL_SCANCODE_LEFT]);
+			const int8_t xDir = (pKeyboardState[SDL_SCANCODE_D] | pKeyboardState[SDL_SCANCODE_RIGHT]) -
+								(pKeyboardState[SDL_SCANCODE_A] | pKeyboardState[SDL_SCANCODE_LEFT]);
 
-			const int8_t zDir = (pKeyboardState[SDL_SCANCODE_W] - pKeyboardState[SDL_SCANCODE_S] +
-								 pKeyboardState[SDL_SCANCODE_UP] - pKeyboardState[SDL_SCANCODE_DOWN]);
+			const int8_t zDir = (pKeyboardState[SDL_SCANCODE_W] | pKeyboardState[SDL_SCANCODE_UP]) -
+								(pKeyboardState[SDL_SCANCODE_S] | pKeyboardState[SDL_SCANCODE_DOWN]);
 
 			origin += zDir * walkSpeed * cameraToWorld.GetAxisZ() * dt;
 			origin += xDir * walkSpeed * cameraToWorld.GetAxisX() * dt;
