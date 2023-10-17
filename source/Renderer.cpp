@@ -127,8 +127,8 @@ void Renderer::CycleLightingMode()
 
 ColorRGB Renderer::LightingObservedArea(const HitRecord& hitRecord, const Vector3& l) const
 {
-	float lcl = Vector3::Dot(hitRecord.normal, l);
-	return (lcl >= 0.0f) ? ColorRGB{ lcl } : colors::Black;
+	float observedArea = Vector3::Dot(hitRecord.normal, l);
+	return (observedArea >= 0.0f) ? ColorRGB{ observedArea } : colors::Black;
 }
 
 ColorRGB Renderer::LightingRadiance(const HitRecord& hitRecord, const Light& light) const
@@ -143,12 +143,12 @@ ColorRGB Renderer::LightingBRDF(Material* pMaterial, const HitRecord& hitRecord,
 
 ColorRGB Renderer::LightingCombined(Material* pMaterial, const HitRecord& hitRecord, const Light& light, const Vector3& l, const Vector3& v) const
 {
-	float lcl = Vector3::Dot(hitRecord.normal, l);
+	float observedArea = Vector3::Dot(hitRecord.normal, l);
 
-	if (lcl < 0.0f)
+	if (observedArea < 0.0f)
 	{
 		return colors::Black;
 	}
 
-	return LightUtils::GetRadiance(light, hitRecord.origin) * pMaterial->Shade(hitRecord, l, v) * lcl;
+	return LightUtils::GetRadiance(light, hitRecord.origin) * pMaterial->Shade(hitRecord, l, v) * observedArea;
 }
