@@ -39,9 +39,9 @@ namespace dae
 			GeometryUtils::HitTest_Plane(plane, ray, closestHit);
 		}
 
-		for (const Triangle& triangle : m_Triangles)
+		for (const TriangleMesh& mesh : m_TriangleMeshGeometries)
 		{
-			GeometryUtils::HitTest_Triangle(triangle, ray, closestHit);
+			GeometryUtils::HitTest_TriangleMesh(mesh, ray, closestHit);
 		}
 	}
 
@@ -63,9 +63,9 @@ namespace dae
 			}
 		}
 
-		for (const Triangle& triangle : m_Triangles)
+		for (const TriangleMesh& mesh : m_TriangleMeshGeometries)
 		{
-			if (GeometryUtils::HitTest_Triangle(triangle, ray))
+			if (GeometryUtils::HitTest_TriangleMesh(mesh, ray))
 			{
 				return true;
 			}
@@ -246,16 +246,25 @@ namespace dae
 		AddPlane(Vector3{ 5.f, 0.f, 0.f }, Vector3{ -1.f, 0.f, 0.f }, matLambert_GrayBlue); //RIGHT
 		AddPlane(Vector3{ -5.f, 0.f, 0.f }, Vector3{ 1.f, 0.f, 0.f }, matLambert_GrayBlue); //LEFT
 
+		m_pMesh = AddTriangleMesh(TriangleCullMode::NoCulling, matLambert_White);
+		Utils::ParseOBJ("Resources/simple_object.obj", m_pMesh->positions, m_pMesh->normals, m_pMesh->indices);
 
-		Triangle triangle{ { -0.75f, 0.5f, 0.f }, { -0.75f, 2.0f, 0.0f }, { 0.75f, 0.5f, 0.0f } };
-		triangle.cullMode = TriangleCullMode::BackFaceCulling;
-		triangle.materialIndex = matLambert_White;
+		m_pMesh->Scale({ 0.7f, 0.7f, 0.7f });
+		m_pMesh->Translate({ 0.0f, 1.0f, 0.0f });
 
-		m_Triangles.push_back(triangle);
+		m_pMesh->UpdateTransforms();
 
 		AddPointLight(Vector3{ 0.f, 5.f, 5.f }, 50.f, ColorRGB{ 1.f, .61f, .45f }); //Backlight
 		AddPointLight(Vector3{ -2.5f, 5.f, -5.f }, 70.f, ColorRGB{ 1.f, .8f, .45f }); //Front Light Left
 		AddPointLight(Vector3{ 2.5f, 2.5f, -5.f }, 50.f, ColorRGB{ .34f, .47f, .68f });
+	}
+
+	void Scene_W4::Update(Timer* pTimer)
+	{
+		Scene::Update(pTimer);
+
+		m_pMesh->RotateY(PI_DIV_2 * pTimer->GetTotal());
+		m_pMesh->UpdateTransforms();
 	}
 #pragma endregion
 }

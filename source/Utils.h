@@ -160,7 +160,7 @@ namespace dae
 				hitRecord.didHit = true;
 				hitRecord.materialIndex = triangle.materialIndex;
 				hitRecord.origin = intersect;
-				hitRecord.normal = triangle.normal;
+				hitRecord.normal = (nvDot < 0.0f) ? triangle.normal : -triangle.normal;
 				hitRecord.t = t;
 			}
 
@@ -177,9 +177,31 @@ namespace dae
 #pragma region TriangeMesh HitTest
 		inline bool HitTest_TriangleMesh(const TriangleMesh& mesh, const Ray& ray, HitRecord& hitRecord, bool ignoreHitRecord = false)
 		{
-			//todo W5
-			assert(false && "No Implemented Yet!");
-			return false;
+			size_t triangleCount = mesh.indices.size() / 3;
+
+			bool didHit = false;
+
+			for (size_t i = 0; i < triangleCount; ++i)
+			{
+				size_t offset = i * 3;
+
+				Triangle triangle{
+					mesh.transformedPositions[mesh.indices[offset]],
+					mesh.transformedPositions[mesh.indices[offset + 1]],
+					mesh.transformedPositions[mesh.indices[offset + 2]]
+				};
+
+				triangle.materialIndex	= mesh.materialIndex;
+				triangle.normal			= mesh.transformedNormals[i];
+				triangle.cullMode		= mesh.cullMode;
+
+				if (HitTest_Triangle(triangle, ray, hitRecord, ignoreHitRecord))
+				{
+					didHit = true;
+				}
+			}
+
+			return didHit;
 		}
 
 		inline bool HitTest_TriangleMesh(const TriangleMesh& mesh, const Ray& ray)
