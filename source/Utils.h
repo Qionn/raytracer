@@ -138,19 +138,9 @@ namespace dae
 			
 			Vector3 intersect = ray.origin + ray.direction * t;
 
-			Vector3 e1 = triangle.v0 - triangle.v1;
-			Vector3 e2 = triangle.v1 - triangle.v2;
-			Vector3 e3 = triangle.v2 - triangle.v0;
-
-			Vector3 p1 = intersect - triangle.v1;
-			Vector3 p2 = intersect - triangle.v2;
-			Vector3 p3 = intersect - triangle.v0;
-
-			float t1 = Vector3::Dot(Vector3::Cross(e1, p1), triangle.normal);
-			float t2 = Vector3::Dot(Vector3::Cross(e2, p2), triangle.normal);
-			float t3 = Vector3::Dot(Vector3::Cross(e3, p3), triangle.normal);
-
-			if (t1 > 0.0f || t2 > 0.0f || t3 > 0.0f)
+			if (Vector3::Dot(Vector3::Cross(triangle.v0 - triangle.v1, intersect - triangle.v1), triangle.normal) > 0.0f ||
+				Vector3::Dot(Vector3::Cross(triangle.v1 - triangle.v2, intersect - triangle.v2), triangle.normal) > 0.0f ||
+				Vector3::Dot(Vector3::Cross(triangle.v2 - triangle.v0, intersect - triangle.v0), triangle.normal) > 0.0f)
 			{
 				return false;
 			}
