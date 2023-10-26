@@ -10,145 +10,128 @@
 #include "Scene.h"
 #include "Utils.h"
 
-using namespace dae;
 
-Renderer::Renderer(SDL_Window * pWindow) :
-	m_pWindow(pWindow),
-	m_pBuffer(SDL_GetWindowSurface(pWindow))
+namespace dae
 {
-	//Initialize
-	SDL_GetWindowSize(pWindow, &m_Width, &m_Height);
-	m_pBufferPixels = static_cast<uint32_t*>(m_pBuffer->pixels);
-}
-
-void Renderer::Render(Scene* pScene) const
-{
-	Camera& camera = pScene->GetCamera();
-	auto& materials = pScene->GetMaterials();
-	auto& lights = pScene->GetLights();
-
-	const auto aspectRatio = static_cast<float>(m_Width) / static_cast<float>(m_Height);
-
-	for (int px{}; px < m_Width; ++px)
+	Renderer::Renderer(SDL_Window* pWindow)
+		: m_pWindow(pWindow)
+		, m_pBuffer(SDL_GetWindowSurface(pWindow))
 	{
-		for (int py{}; py < m_Height; ++py)
+		SDL_GetWindowSize(pWindow, &m_Width, &m_Height);
+		m_AspectRatio = static_cast<float>(m_Width) / static_cast<float>(m_Height);
+		m_pBufferPixels = static_cast<uint32_t*>(m_pBuffer->pixels);
+	}
+
+	void Renderer::Render(Scene* pScene) const
+	{
+		int pixelCount = m_Width * m_Height;
+
+		for (int i = 0; i < pixelCount; ++i)
 		{
-			float ndcX = (2.0f * (px + 0.5f) / m_Width - 1.0f);
-			float ndcY = 1.0f - 2.0f * (py + 0.5f) / m_Height;
+			RenderPixel(pScene, i);
+		}
 
-			Vector3 rayDirection = {
-				ndcX * camera.fov * aspectRatio,
-				ndcY * camera.fov,
-				1.0f
-			};
+		SDL_UpdateWindowSurface(m_pWindow);
+	}
 
-			rayDirection = camera.cameraToWorld.TransformVector(rayDirection);
-			rayDirection.Normalize();
+	bool Renderer::SaveBufferToImage() const
+	{
+		return SDL_SaveBMP(m_pBuffer, "RayTracing_Buffer.bmp");
+	}
 
-			Ray ray{ camera.origin, rayDirection };
+	void Renderer::ToggleShadows()
+	{
+		m_ShadowsEnabled = !m_ShadowsEnabled;
+	}
 
-			ColorRGB finalColor;
+	void Renderer::CycleLightingMode()
+	{
+		const int modeCount = static_cast<int>(LightingMode::Count);
+		m_LightingMode = static_cast<LightingMode>((static_cast<int>(m_LightingMode) + 1) % modeCount);
+	}
 
-			HitRecord closestHit{};
-			pScene->GetClosestHit(ray, closestHit);
+	void Renderer::RenderPixel(Scene* pScene, int pixelIndex) const
+	{
+		Camera& camera = pScene->GetCamera();
+		auto& materials = pScene->GetMaterials();
+		auto& lights = pScene->GetLights();
 
-			rayDirection = -rayDirection;
+		int px = FastMod(pixelIndex, m_Width);
+		int py = pixelIndex / m_Width;
 
-			if (closestHit.didHit)
+		float ndcX = (2.0f * (px + 0.5f) / m_Width - 1.0f);
+		float ndcY = 1.0f - 2.0f * (py + 0.5f) / m_Height;
+
+		Vector3 rayDirection = {
+			ndcX * camera.fov * m_AspectRatio,
+			ndcY * camera.fov,
+			1.0f
+		};
+
+		rayDirection = camera.cameraToWorld.TransformVector(rayDirection);
+		rayDirection.Normalize();
+
+		Ray ray{ camera.origin, rayDirection };
+
+		HitRecord closestHit{};
+		pScene->GetClosestHit(ray, closestHit);
+
+		rayDirection = -rayDirection;
+
+		Material* pMaterial = materials[closestHit.materialIndex];
+		ColorRGB finalColor = colors::Black;
+
+		if (closestHit.didHit)
+		{
+			for (auto& light : lights)
 			{
-				for (auto& light : lights)
+				Vector3 lightRayDirection = LightUtils::GetDirectionToLight(light, closestHit.origin);
+
+				ray.max = lightRayDirection.Normalize();
+				ray.origin = closestHit.origin + closestHit.normal * 0.0001f;
+				ray.direction = lightRayDirection;
+
+				if (m_ShadowsEnabled && pScene->DoesHit(ray))
 				{
-					Vector3 lightRayDirection = LightUtils::GetDirectionToLight(light, closestHit.origin);
-				
-					ray.max = lightRayDirection.Normalize();
-					ray.origin = closestHit.origin + closestHit.normal * 0.0001f;
-					ray.direction = lightRayDirection;
-				
-					if (m_ShadowsEnabled && pScene->DoesHit(ray))
-					{
-						continue;
-					}
+					continue;
+				}
 
-					switch (m_LightingMode)
-					{
-						case LightingMode::ObservedArea:
-							finalColor += LightingObservedArea(closestHit, lightRayDirection);
-							break;
+				float observedArea = Vector3::Dot(closestHit.normal, lightRayDirection);
 
-						case LightingMode::Radiance:
-							finalColor += LightingRadiance(closestHit, light);
-							break;
+				switch (m_LightingMode)
+				{
+					case LightingMode::ObservedArea:
+						if (observedArea > 0.0f)
+						{
+							finalColor += ColorRGB{ observedArea };
+						}
+						break;
 
-						case LightingMode::BRDF:
-							finalColor += LightingBRDF(materials[closestHit.materialIndex], closestHit, lightRayDirection, rayDirection);
-							break;
+					case LightingMode::Radiance:
+						finalColor += LightUtils::GetRadiance(light, closestHit.origin);
+						break;
 
-						case LightingMode::Combined:
-							finalColor += LightingCombined(materials[closestHit.materialIndex], closestHit, light, lightRayDirection, rayDirection);
-							break;
-					}
+					case LightingMode::BRDF:
+						finalColor += pMaterial->Shade(closestHit, lightRayDirection, rayDirection);
+						break;
+
+					case LightingMode::Combined:
+						if (observedArea > 0.0f)
+						{
+							finalColor += (observedArea * LightUtils::GetRadiance(light, closestHit.origin) *
+										   pMaterial->Shade(closestHit, lightRayDirection, rayDirection));
+						}
+						break;
 				}
 			}
-
-			//Update Color in Buffer
-			finalColor.MaxToOne();
-
-			m_pBufferPixels[px + (py * m_Width)] = SDL_MapRGB(m_pBuffer->format,
-				static_cast<uint8_t>(finalColor.r * 255),
-				static_cast<uint8_t>(finalColor.g * 255),
-				static_cast<uint8_t>(finalColor.b * 255));
 		}
+
+		//Update Color in Buffer
+		finalColor.MaxToOne();
+
+		m_pBufferPixels[px + (py * m_Width)] = SDL_MapRGB(m_pBuffer->format,
+														  static_cast<uint8_t>(finalColor.r * 255),
+														  static_cast<uint8_t>(finalColor.g * 255),
+														  static_cast<uint8_t>(finalColor.b * 255));
 	}
-
-	//@END
-	//Update SDL Surface
-	SDL_UpdateWindowSurface(m_pWindow);
-}
-
-bool Renderer::SaveBufferToImage() const
-{
-	return SDL_SaveBMP(m_pBuffer, "RayTracing_Buffer.bmp");
-}
-
-void Renderer::ToggleShadows()
-{
-	m_ShadowsEnabled = !m_ShadowsEnabled;
-}
-
-void Renderer::CycleLightingMode()
-{
-	const int modeCount = static_cast<int>(LightingMode::Count);
-	
-	int value = static_cast<int>(m_LightingMode);
-	value = (value + 1) % modeCount;
-
-	m_LightingMode = static_cast<LightingMode>(value);
-}
-
-ColorRGB Renderer::LightingObservedArea(const HitRecord& hitRecord, const Vector3& l) const
-{
-	float observedArea = Vector3::Dot(hitRecord.normal, l);
-	return (observedArea >= 0.0f) ? ColorRGB{ observedArea } : colors::Black;
-}
-
-ColorRGB Renderer::LightingRadiance(const HitRecord& hitRecord, const Light& light) const
-{
-	return LightUtils::GetRadiance(light, hitRecord.origin);
-}
-
-ColorRGB Renderer::LightingBRDF(Material* pMaterial, const HitRecord& hitRecord, const Vector3& l, const Vector3& v) const
-{
-	return pMaterial->Shade(hitRecord, l, v);
-}
-
-ColorRGB Renderer::LightingCombined(Material* pMaterial, const HitRecord& hitRecord, const Light& light, const Vector3& l, const Vector3& v) const
-{
-	float observedArea = Vector3::Dot(hitRecord.normal, l);
-
-	if (observedArea < 0.0f)
-	{
-		return colors::Black;
-	}
-
-	return LightUtils::GetRadiance(light, hitRecord.origin) * pMaterial->Shade(hitRecord, l, v) * observedArea;
 }

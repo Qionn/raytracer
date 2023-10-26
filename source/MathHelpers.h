@@ -28,4 +28,10 @@ namespace dae
 	{
 		return abs(a - b) < epsilon;
 	}
+
+	template<typename T>
+	constexpr T FastMod(T a, T b)
+	{
+		return (a < b) ? a : a % b;
+	}
 }
