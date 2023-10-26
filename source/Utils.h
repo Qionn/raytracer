@@ -93,7 +93,7 @@ namespace dae
 			Vector3 edge1 = triangle.v1 - triangle.v0;
 			Vector3 edge2 = triangle.v2 - triangle.v0;
 
-			Vector3 h = Vector3::Cross(ray.direction, edge2);
+			Vector3 h = Vector3::Cross(edge2, ray.direction);
 			float a = Vector3::Dot(edge1, h);
 
 			TriangleCullMode cullMode = triangle.cullMode;
@@ -131,7 +131,7 @@ namespace dae
 				return false;
 			}
 
-			Vector3 q = Vector3::Cross(s, edge1);
+			Vector3 q = Vector3::Cross(edge1, s);
 			float v = f * Vector3::Dot(ray.direction, q);
 
 			if (v < 0.0f || u + v > 1.0f)

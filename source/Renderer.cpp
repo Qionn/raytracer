@@ -10,6 +10,11 @@
 #include "Scene.h"
 #include "Utils.h"
 
+#define PARALELL_EXECUTION 1
+
+#include <algorithm>
+#include <execution>
+#include <ranges>
 
 namespace dae
 {
@@ -26,10 +31,18 @@ namespace dae
 	{
 		int pixelCount = m_Width * m_Height;
 
+	#if PARALELL_EXECUTION
+		auto indices = std::views::iota(0, pixelCount);
+		
+		std::for_each(std::execution::par, indices.begin(), indices.end(), [&](int i) {
+			RenderPixel(pScene, i);
+		});
+	#else
 		for (int i = 0; i < pixelCount; ++i)
 		{
 			RenderPixel(pScene, i);
 		}
+	#endif
 
 		SDL_UpdateWindowSurface(m_pWindow);
 	}
