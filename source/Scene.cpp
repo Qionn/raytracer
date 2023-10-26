@@ -267,7 +267,7 @@ namespace dae
 		m_pMesh->UpdateTransforms();
 	}
 
-	void Scene_W4_ReferenceScene::Initialize()
+	void Scene_W4_Reference::Initialize()
 	{
 		sceneName = "Reference Scene";
 		m_Camera.origin = { 0,3,-9 };
@@ -319,7 +319,7 @@ namespace dae
 		AddPointLight(Vector3{ 2.5f, 2.5f, -5.f }, 50.f, ColorRGB{ .34f, .47f, .68f });
 	}
 
-	void Scene_W4_ReferenceScene::Update(Timer* pTimer)
+	void Scene_W4_Reference::Update(Timer* pTimer)
 	{
 		Scene::Update(pTimer);
 
@@ -331,7 +331,7 @@ namespace dae
 		}
 	}
 
-	void Scene_W4_BunnyScene::Initialize()
+	void Scene_W4_Bunny::Initialize()
 	{
 		sceneName = "Bunny Scene";
 		m_Camera.origin = { 0, 3, -9 };

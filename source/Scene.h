@@ -132,16 +132,16 @@ namespace dae
 
 	//+++++++++++++++++++++++++++++++++++++++++
 	//WEEK 4 Reference Scene
-	class Scene_W4_ReferenceScene final : public Scene
+	class Scene_W4_Reference final : public Scene
 	{
 	public:
-		Scene_W4_ReferenceScene() = default;
-		~Scene_W4_ReferenceScene() override = default;
+		Scene_W4_Reference() = default;
+		~Scene_W4_Reference() override = default;
 
-		Scene_W4_ReferenceScene(const Scene_W4_ReferenceScene&) = delete;
-		Scene_W4_ReferenceScene(Scene_W4_ReferenceScene&&) noexcept = delete;
-		Scene_W4_ReferenceScene& operator=(const Scene_W4_ReferenceScene&) = delete;
-		Scene_W4_ReferenceScene& operator=(Scene_W4_ReferenceScene&&) noexcept = delete;
+		Scene_W4_Reference(const Scene_W4_Reference&) = delete;
+		Scene_W4_Reference(Scene_W4_Reference&&) noexcept = delete;
+		Scene_W4_Reference& operator=(const Scene_W4_Reference&) = delete;
+		Scene_W4_Reference& operator=(Scene_W4_Reference&&) noexcept = delete;
 
 		void Initialize() override;
 		void Update(Timer* pTimer) override;
@@ -152,16 +152,16 @@ namespace dae
 
 	//+++++++++++++++++++++++++++++++++++++++++
 	//WEEK 4 Bunny Scene
-	class Scene_W4_BunnyScene final : public Scene
+	class Scene_W4_Bunny final : public Scene
 	{
 	public:
-		Scene_W4_BunnyScene() = default;
-		~Scene_W4_BunnyScene() override = default;
+		Scene_W4_Bunny() = default;
+		~Scene_W4_Bunny() override = default;
 
-		Scene_W4_BunnyScene(const Scene_W4_BunnyScene&) = delete;
-		Scene_W4_BunnyScene(Scene_W4_BunnyScene&&) noexcept = delete;
-		Scene_W4_BunnyScene& operator=(const Scene_W4_BunnyScene&) = delete;
-		Scene_W4_BunnyScene& operator=(Scene_W4_BunnyScene&&) noexcept = delete;
+		Scene_W4_Bunny(const Scene_W4_Bunny&) = delete;
+		Scene_W4_Bunny(Scene_W4_Bunny&&) noexcept = delete;
+		Scene_W4_Bunny& operator=(const Scene_W4_Bunny&) = delete;
+		Scene_W4_Bunny& operator=(Scene_W4_Bunny&&) noexcept = delete;
 
 		void Initialize() override;
 	};
