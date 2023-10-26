@@ -90,57 +90,58 @@ namespace dae
 		//TRIANGLE HIT-TESTS
 		inline bool HitTest_Triangle(const Triangle& triangle, const Ray& ray, HitRecord& hitRecord, bool ignoreHitRecord = false)
 		{
-			float nvDot = Vector3::Dot(ray.direction, triangle.normal);
-			if (AreEqual(nvDot, 0.0f))
-			{
-				return false;
-			}
+			Vector3 edge1 = triangle.v1 - triangle.v0;
+			Vector3 edge2 = triangle.v2 - triangle.v0;
+
+			Vector3 h = Vector3::Cross(ray.direction, edge2);
+			float a = Vector3::Dot(edge1, h);
 
 			TriangleCullMode cullMode = triangle.cullMode;
-
 			if (ignoreHitRecord)
 			{
 				switch (cullMode)
 				{
-					case TriangleCullMode::FrontFaceCulling:
-						cullMode = TriangleCullMode::BackFaceCulling;
-						break;
-
 					case TriangleCullMode::BackFaceCulling:
 						cullMode = TriangleCullMode::FrontFaceCulling;
+						break;
+
+					case TriangleCullMode::FrontFaceCulling:
+						cullMode = TriangleCullMode::BackFaceCulling;
 						break;
 				}
 			}
 
-			switch (cullMode)
-			{
-				case TriangleCullMode::FrontFaceCulling:
-					if (nvDot < 0.0f)
-					{
-						return false;
-					}
-					break;
-
-				case TriangleCullMode::BackFaceCulling:
-					if (nvDot > 0.0f)
-					{
-						return false;
-					}
-					break;
-			}
-
-			float t = Vector3::Dot(triangle.v0 - ray.origin, triangle.normal) / Vector3::Dot(ray.direction, triangle.normal);
-
-			if (t < ray.min || t > ray.max)
+			if (a > -FLT_EPSILON && a < FLT_EPSILON)
 			{
 				return false;
 			}
-			
-			Vector3 intersect = ray.origin + ray.direction * t;
 
-			if (Vector3::Dot(Vector3::Cross(triangle.v0 - triangle.v1, intersect - triangle.v1), triangle.normal) > 0.0f ||
-				Vector3::Dot(Vector3::Cross(triangle.v1 - triangle.v2, intersect - triangle.v2), triangle.normal) > 0.0f ||
-				Vector3::Dot(Vector3::Cross(triangle.v2 - triangle.v0, intersect - triangle.v0), triangle.normal) > 0.0f)
+			if ((cullMode == TriangleCullMode::BackFaceCulling && a > 0) ||
+				(cullMode == TriangleCullMode::FrontFaceCulling && a < 0))
+			{
+				return false;
+			}
+
+			float f = 1.0f / a;
+			Vector3 s = ray.origin - triangle.v0;
+			float u = f * Vector3::Dot(s, h);
+
+			if (u < 0.0f || u > 1.0f)
+			{
+				return false;
+			}
+
+			Vector3 q = Vector3::Cross(s, edge1);
+			float v = f * Vector3::Dot(ray.direction, q);
+
+			if (v < 0.0f || u + v > 1.0f)
+			{
+				return false;
+			}
+
+			float t = f * Vector3::Dot(edge2, q);
+
+			if (t < ray.min || t > ray.max)
 			{
 				return false;
 			}
@@ -149,8 +150,8 @@ namespace dae
 			{
 				hitRecord.didHit = true;
 				hitRecord.materialIndex = triangle.materialIndex;
-				hitRecord.origin = intersect;
-				hitRecord.normal = (nvDot < 0.0f) ? triangle.normal : -triangle.normal;
+				hitRecord.origin = ray.origin + ray.direction * t;
+				hitRecord.normal = triangle.normal;
 				hitRecord.t = t;
 			}
 
