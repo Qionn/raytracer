@@ -178,11 +178,11 @@ namespace dae
 				Triangle triangle{
 					mesh.transformedPositions[mesh.indices[offset]],
 					mesh.transformedPositions[mesh.indices[offset + 1]],
-					mesh.transformedPositions[mesh.indices[offset + 2]]
+					mesh.transformedPositions[mesh.indices[offset + 2]],
+					mesh.transformedNormals[i]
 				};
 
 				triangle.materialIndex	= mesh.materialIndex;
-				triangle.normal			= mesh.transformedNormals[i];
 				triangle.cullMode		= mesh.cullMode;
 
 				if (HitTest_Triangle(triangle, ray, hitRecord, ignoreHitRecord))
