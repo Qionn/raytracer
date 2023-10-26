@@ -51,8 +51,7 @@ namespace dae
 		int m_Height{};
 		float m_AspectRatio{};
 
+		bool m_ShadowsEnabled = true;
 		LightingMode m_LightingMode = LightingMode::Combined;
-
-		bool m_ShadowsEnabled = false;
 	};
 }
