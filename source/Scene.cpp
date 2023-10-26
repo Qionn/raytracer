@@ -354,6 +354,8 @@ namespace dae
 		Utils::ParseOBJ("Resources/lowpoly_bunny2.obj", pMesh->positions, pMesh->normals, pMesh->indices);
 		
 		pMesh->Scale({ 2.0f, 2.0f, 2.0f });
+
+		pMesh->UpdateAABB();
 		pMesh->UpdateTransforms();
 	}
 #pragma endregion
