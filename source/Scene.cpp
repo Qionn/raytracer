@@ -350,13 +350,22 @@ namespace dae
 		AddPointLight(Vector3{ -2.5f, 5.f, -5.f }, 70.f, ColorRGB{ 1.f, .8f, .45f }); //Front Light Left
 		AddPointLight(Vector3{ 2.5f, 2.5f, -5.f }, 50.f, ColorRGB{ .34f, .47f, .68f });
 
-		auto pMesh = AddTriangleMesh(TriangleCullMode::BackFaceCulling, matLambert_White);
-		Utils::ParseOBJ("Resources/lowpoly_bunny2.obj", pMesh->positions, pMesh->normals, pMesh->indices);
+		m_pMesh = AddTriangleMesh(TriangleCullMode::BackFaceCulling, matLambert_White);
+		Utils::ParseOBJ("Resources/lowpoly_bunny2.obj", m_pMesh->positions, m_pMesh->normals, m_pMesh->indices);
 		
-		pMesh->Scale({ 2.0f, 2.0f, 2.0f });
+		m_pMesh->Scale({ 2.0f, 2.0f, 2.0f });
 
-		pMesh->UpdateAABB();
-		pMesh->UpdateTransforms();
+		m_pMesh->UpdateAABB();
+		m_pMesh->UpdateTransforms();
+	}
+
+	void Scene_W4_Bunny::Update(Timer* pTimer)
+	{
+		Scene::Update(pTimer);
+
+		auto yawAngle = (std::cos(pTimer->GetTotal()) + 1.0f) / 2.0f * PI_2;
+		m_pMesh->RotateY(yawAngle);
+		m_pMesh->UpdateTransforms();
 	}
 #pragma endregion
 }

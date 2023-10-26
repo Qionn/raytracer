@@ -164,5 +164,9 @@ namespace dae
 		Scene_W4_Bunny& operator=(Scene_W4_Bunny&&) noexcept = delete;
 
 		void Initialize() override;
+		void Update(Timer* pTimer) override;
+
+	private:
+		TriangleMesh* m_pMesh{};
 	};
 }
