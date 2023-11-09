@@ -29,7 +29,7 @@ namespace dae
 		float prevFovAngle	= 0.0f;
 		float fov			= 0.0f;
 
-		float rotationSpeed	= 1.0f;
+		float rotationSpeed	= 0.01f;
 		float walkSpeed		= 10.0f;
 		float dragSpeed		= 5.0f;
 
@@ -91,13 +91,13 @@ namespace dae
 			}
 			else if (isRightMouseDown)
 			{
-				totalYaw += mouseX * rotationSpeed * dt;
-				totalPitch += mouseY * rotationSpeed * dt;
+				totalYaw += mouseX * rotationSpeed;
+				totalPitch += mouseY * rotationSpeed;
 			}
 			else if (isLeftMouseDown)
 			{
 				origin -= mouseY * dragSpeed * cameraToWorld.GetAxisZ() * dt;
-				totalYaw += mouseX * rotationSpeed * dt;
+				totalYaw += mouseX * rotationSpeed;
 			}
 		}
 	};
