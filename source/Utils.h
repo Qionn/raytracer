@@ -92,55 +92,32 @@ namespace dae
 		{
 			Vector3 edge1 = triangle.v1 - triangle.v0;
 			Vector3 edge2 = triangle.v2 - triangle.v0;
+			Vector3 pVec = Vector3::Cross(ray.direction, edge2);
+			float det = Vector3::Dot(edge1, pVec);
 
-			Vector3 h = Vector3::Cross(edge2, ray.direction);
-			float a = Vector3::Dot(edge1, h);
-
-			TriangleCullMode cullMode = triangle.cullMode;
-			if (ignoreHitRecord)
-			{
-				switch (cullMode)
-				{
-					case TriangleCullMode::BackFaceCulling:
-						cullMode = TriangleCullMode::FrontFaceCulling;
-						break;
-
-					case TriangleCullMode::FrontFaceCulling:
-						cullMode = TriangleCullMode::BackFaceCulling;
-						break;
-				}
-			}
-
-			if (a > -FLT_EPSILON && a < FLT_EPSILON)
+			bool isBackFaceCulling = (triangle.cullMode == TriangleCullMode::BackFaceCulling) != ignoreHitRecord;
+			if ((isBackFaceCulling && det < FLT_EPSILON) ||
+				(!isBackFaceCulling && det > -FLT_EPSILON && det < FLT_EPSILON))
 			{
 				return false;
 			}
 
-			if ((cullMode == TriangleCullMode::BackFaceCulling && a > 0) ||
-				(cullMode == TriangleCullMode::FrontFaceCulling && a < 0))
-			{
-				return false;
-			}
-
-			float f = 1.0f / a;
-			Vector3 s = ray.origin - triangle.v0;
-			float u = f * Vector3::Dot(s, h);
-
+			float invDet = 1.0f / det;
+			Vector3 tVec = ray.origin - triangle.v0;
+			float u = Vector3::Dot(tVec, pVec) * invDet;
 			if (u < 0.0f || u > 1.0f)
 			{
 				return false;
 			}
 
-			Vector3 q = Vector3::Cross(edge1, s);
-			float v = f * Vector3::Dot(ray.direction, q);
-
+			Vector3 qVec = Vector3::Cross(tVec, edge1);
+			float v = Vector3::Dot(ray.direction, qVec) * invDet;
 			if (v < 0.0f || u + v > 1.0f)
 			{
 				return false;
 			}
 
-			float t = f * Vector3::Dot(edge2, q);
-
+			float t = Vector3::Dot(edge2, qVec) * invDet;
 			if (t < ray.min || t > ray.max)
 			{
 				return false;
